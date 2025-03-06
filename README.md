@@ -5,7 +5,6 @@ This is a simple **Employee Management System** built using:
 - C#
 - WinForms
 - LINQ
-- NuGet Packages
 
 ## Features
 - Add Employee
