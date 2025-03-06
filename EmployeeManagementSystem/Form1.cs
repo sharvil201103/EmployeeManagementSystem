@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using System.Xml.Linq;
 
 namespace EmployeeManagementSystem
 {
@@ -15,9 +14,16 @@ namespace EmployeeManagementSystem
             InitializeComponent();
         }
 
-        // ADD EMPLOYEE
         private void btnAdd_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(txtName.Text) ||
+                string.IsNullOrWhiteSpace(txtDepartment.Text) ||
+                string.IsNullOrWhiteSpace(txtEmail.Text))
+            {
+                MessageBox.Show("Please fill all fields.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             int newId = employees.Count > 0 ? employees.Max(emp => emp.Id) + 1 : 1;
 
             Employee newEmployee = new Employee
@@ -30,14 +36,14 @@ namespace EmployeeManagementSystem
 
             employees.Add(newEmployee);
             RefreshEmployeeList();
+            ClearInputFields();
         }
 
-        // EDIT EMPLOYEE
         private void btnEdit_Click(object sender, EventArgs e)
         {
             if (!int.TryParse(txtId.Text, out int editId))
             {
-                MessageBox.Show("Invalid ID");
+                MessageBox.Show("Invalid ID", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -49,19 +55,19 @@ namespace EmployeeManagementSystem
                 employee.Email = txtEmail.Text.Trim();
 
                 RefreshEmployeeList();
+                ClearInputFields();
             }
             else
             {
-                MessageBox.Show("Employee not found.");
+                MessageBox.Show("Employee not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // DELETE EMPLOYEE
         private void btnDelete_Click(object sender, EventArgs e)
         {
             if (!int.TryParse(txtId.Text, out int deleteId))
             {
-                MessageBox.Show("Invalid ID");
+                MessageBox.Show("Invalid ID", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -70,14 +76,14 @@ namespace EmployeeManagementSystem
             {
                 employees.Remove(employee);
                 RefreshEmployeeList();
+                ClearInputFields();
             }
             else
             {
-                MessageBox.Show("Employee not found.");
+                MessageBox.Show("Employee not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // SEARCH EMPLOYEE
         private void btnSearch_Click(object sender, EventArgs e)
         {
             string searchTerm = txtSearch.Text.Trim().ToLower();
@@ -91,7 +97,6 @@ namespace EmployeeManagementSystem
             RefreshEmployeeList(results);
         }
 
-        // REFRESH EMPLOYEE LIST (helper method)
         private void RefreshEmployeeList(List<Employee> listToShow = null)
         {
             lstEmployees.Items.Clear();
@@ -101,6 +106,15 @@ namespace EmployeeManagementSystem
             {
                 lstEmployees.Items.Add($"{emp.Id} - {emp.Name} - {emp.Department} - {emp.Email}");
             }
+        }
+
+        private void ClearInputFields()
+        {
+            txtId.Clear();
+            txtName.Clear();
+            txtDepartment.Clear();
+            txtEmail.Clear();
+            txtSearch.Clear();
         }
     }
 }
