@@ -84,8 +84,8 @@ namespace EmployeeManagementSystem
         private void btnSearch_Click(object sender, EventArgs e)
         {
             string searchTerm = txtSearch.Text.Trim().ToLower();
-
             var results = employees.Where(emp =>
+                emp.Id.ToString() == searchTerm ||
                 emp.Name.ToLower().Contains(searchTerm) ||
                 emp.Department.ToLower().Contains(searchTerm) ||
                 emp.Email.ToLower().Contains(searchTerm)
@@ -93,6 +93,7 @@ namespace EmployeeManagementSystem
 
             RefreshEmployeeList(results);
         }
+
 
         private void RefreshEmployeeList(List<Employee> listToShow = null)
         {
