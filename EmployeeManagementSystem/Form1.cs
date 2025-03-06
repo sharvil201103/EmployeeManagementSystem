@@ -19,7 +19,26 @@ namespace EmployeeManagementSystem
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            int newId = employees.Count > 0 ? employees.Max(emp => emp.Id) + 1 : 1;
+            int newId;
+
+            if (string.IsNullOrWhiteSpace(txtId.Text))
+            {
+                newId = employees.Count > 0 ? employees.Max(emp => emp.Id) + 1 : 1;
+            }
+            else
+            {
+                if (!int.TryParse(txtId.Text.Trim(), out newId))
+                {
+                    MessageBox.Show("Invalid ID format. Please enter a valid number.");
+                    return;
+                }
+
+                if (employees.Any(emp => emp.Id == newId))
+                {
+                    MessageBox.Show("An employee with this ID already exists. Please enter a different ID.");
+                    return;
+                }
+            }
 
             Employee newEmployee = new Employee
             {
@@ -34,6 +53,7 @@ namespace EmployeeManagementSystem
             SaveEmployees();
             ClearFields();
         }
+
 
         private void btnEdit_Click(object sender, EventArgs e)
         {
@@ -74,6 +94,7 @@ namespace EmployeeManagementSystem
                 employees.Remove(employee);
                 RefreshEmployeeList();
                 SaveEmployees();
+                ClearFields();
             }
             else
             {
@@ -154,5 +175,7 @@ namespace EmployeeManagementSystem
             txtDepartment.Text = "";
             txtEmail.Text = "";
         }
+
+
     }
 }
