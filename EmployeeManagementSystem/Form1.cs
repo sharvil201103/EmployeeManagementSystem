@@ -2,28 +2,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace EmployeeManagementSystem
 {
     public partial class Form1 : Form
     {
         private List<Employee> employees = new List<Employee>();
+        private const string FilePath = "employees.xml";
 
         public Form1()
         {
             InitializeComponent();
+            LoadEmployees();
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtName.Text) ||
-                string.IsNullOrWhiteSpace(txtDepartment.Text) ||
-                string.IsNullOrWhiteSpace(txtEmail.Text))
-            {
-                MessageBox.Show("Please fill all fields.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
             int newId = employees.Count > 0 ? employees.Max(emp => emp.Id) + 1 : 1;
 
             Employee newEmployee = new Employee
@@ -36,14 +31,15 @@ namespace EmployeeManagementSystem
 
             employees.Add(newEmployee);
             RefreshEmployeeList();
-            ClearInputFields();
+            SaveEmployees();
+            ClearFields();
         }
 
         private void btnEdit_Click(object sender, EventArgs e)
         {
             if (!int.TryParse(txtId.Text, out int editId))
             {
-                MessageBox.Show("Invalid ID", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Invalid ID");
                 return;
             }
 
@@ -55,11 +51,12 @@ namespace EmployeeManagementSystem
                 employee.Email = txtEmail.Text.Trim();
 
                 RefreshEmployeeList();
-                ClearInputFields();
+                SaveEmployees();
+                ClearFields();
             }
             else
             {
-                MessageBox.Show("Employee not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Employee not found.");
             }
         }
 
@@ -67,7 +64,7 @@ namespace EmployeeManagementSystem
         {
             if (!int.TryParse(txtId.Text, out int deleteId))
             {
-                MessageBox.Show("Invalid ID", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Invalid ID");
                 return;
             }
 
@@ -76,11 +73,11 @@ namespace EmployeeManagementSystem
             {
                 employees.Remove(employee);
                 RefreshEmployeeList();
-                ClearInputFields();
+                SaveEmployees();
             }
             else
             {
-                MessageBox.Show("Employee not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Employee not found.");
             }
         }
 
@@ -108,13 +105,53 @@ namespace EmployeeManagementSystem
             }
         }
 
-        private void ClearInputFields()
+        private void SaveEmployees()
         {
-            txtId.Clear();
-            txtName.Clear();
-            txtDepartment.Clear();
-            txtEmail.Clear();
-            txtSearch.Clear();
+            var xDocument = new XDocument(
+                new XElement("Employees",
+                    employees.Select(emp =>
+                        new XElement("Employee",
+                            new XElement("Id", emp.Id),
+                            new XElement("Name", emp.Name),
+                            new XElement("Department", emp.Department),
+                            new XElement("Email", emp.Email)
+                        )
+                    )
+                )
+            );
+
+            xDocument.Save(FilePath);
+        }
+
+        private void LoadEmployees()
+        {
+            if (!System.IO.File.Exists(FilePath))
+            {
+                employees = new List<Employee>();
+                return;
+            }
+
+            var xDocument = XDocument.Load(FilePath);
+
+            employees = xDocument.Root.Elements("Employee")
+                .Select(emp => new Employee
+                {
+                    Id = int.Parse(emp.Element("Id").Value),
+                    Name = emp.Element("Name").Value,
+                    Department = emp.Element("Department").Value,
+                    Email = emp.Element("Email").Value
+                })
+                .ToList();
+
+            RefreshEmployeeList();
+        }
+
+        private void ClearFields()
+        {
+            txtId.Text = "";
+            txtName.Text = "";
+            txtDepartment.Text = "";
+            txtEmail.Text = "";
         }
     }
 }
